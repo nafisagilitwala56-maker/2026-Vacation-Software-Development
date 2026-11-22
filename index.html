@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Detective — The Midnight Server Breach</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  padding: 30px 15px;
+  background: #161b22;
+  border-bottom: 2px solid #30363d;
+}
+
+header h1 {
+  color: #58a6ff;
+}
+
+header p {
+  color: #8b949e;
+  margin-top: 5px;
+}
+
+main {
+  max-width: 1000px;
+  margin: 25px auto;
+  padding: 0 15px;
+}
+
+.card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+button {
+  background: #238636;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #2ea043;
+}
+
+.case-stats {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.evidence-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.evidence {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.evidence:hover {
+  transform: translateY(-4px);
+  border-color: #58a6ff;
+}
+
+.evidence.unlocked {
+  border-color: #238636;
+  cursor: default;
+}
+
+.evidence h3 {
+  color: #58a6ff;
+  margin-bottom: 8px;
+}
+
+.suspect-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+}
+
+.suspect {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.suspect.eliminated {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  background: #0d1117;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+}
+
+#result-title.correct {
+  color: #3fb950;
+}
+
+#result-title.wrong {
+  color: #f85149;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #8b949e;
+  border-top: 1px solid #30363d;
+}
+
+@media (max-width: 600px) {
+  .case-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🔍 Digital Detective</h1>
+  <p>The Midnight Server Breach</p>
+</header>
+
+<main>
+
+<section id="intro" class="card">
+  <h2>Case Briefing</h2>
+  <p>
+    At <strong>2:17 AM</strong>, someone accessed the college server and copied
+    confidential student records. Three people had access that night.
+  </p>
+  <p>
+    Examine the evidence, unlock clues, and identify the culprit.
+    You must collect at least <strong>3 clues</strong> before making an accusation.
+  </p>
+  <button id="start-btn">Start Investigation</button>
+</section>
+
+<section id="game" class="hidden">
+
+  <div class="case-stats">
+    <p>Clues found: <span id="clue-count">0</span>/4</p>
+    <p>Suspects eliminated: <span id="eliminated-count">0</span>/2</p>
+  </div>
+
+  <section class="card">
+    <h2>🧾 Digital Evidence</h2>
+    <div id="evidence-board" class="evidence-board"></div>
+  </section>
+
+  <section class="card">
+    <h2>🧩 Suspects</h2>
+    <div id="suspect-list" class="suspect-list"></div>
+  </section>
+
+  <section class="card hidden" id="final-section">
+    <h2>⚖️ Final Accusation</h2>
+    <p>Select the person you believe committed the breach.</p>
+
+    <select id="accusation">
+      <option value="">Choose a suspect</option>
+      <option value="aarav">Aarav Mehta</option>
+      <option value="neha">Neha Kapoor</option>
+      <option value="rohan">Rohan Sharma</option>
+    </select>
+
+    <button id="accuse-btn">Submit Accusation</button>
+  </section>
+
+  <section class="card hidden" id="result-section">
+    <h2 id="result-title"></h2>
+    <p id="result-text"></p>
+    <h3>Investigation Report</h3>
+    <ul id="report-list"></ul>
+    <button id="restart-btn">Start New Investigation</button>
+  </section>
+
+</section>
+</main>
+
+<footer>
+  <p>2026 Software Developer Exploration Lab — Project 01</p>
+</footer>
+
+<script>
+const evidence = [
+  {
+    id: "login-log",
+    title: "Server Login Log",
+    description: "A login occurred at 2:17 AM using a staff account.",
+    clue: "The login came from a laptop connected to the library Wi-Fi."
+  },
+  {
+    id: "library-wifi",
+    title: "Library Wi-Fi Records",
+    description: "Wi-Fi access records from the library that night.",
+    clue: "Only Aarav and Rohan connected to the library Wi-Fi after midnight."
+  },
+  {
+    id: "usb-drive",
+    title: "USB Transfer Record",
+    description: "A USB device transferred a large file shortly after the breach.",
+    clue: "The USB transfer happened at 2:24 AM from a laptop registered to Rohan."
+  },
+  {
+    id: "message",
+    title: "Deleted Chat Message",
+    description: "A partially recovered message from a group chat.",
+    clue: "“I only borrowed the laptop to submit my assignment.” — sent by Neha"
+  }
+];
+
+const suspects = [
+  {
+    id: "aarav",
+    name: "Aarav Mehta",
+    role: "Library Assistant",
+    reason: "Had late-night library access and connected to the Wi-Fi.",
+    guilty: false
+  },
+  {
+    id: "neha",
+    name: "Neha Kapoor",
+    role: "Student Volunteer",
+    reason: "Sent a suspicious message after the breach.",
+    guilty: false
+  },
+  {
+    id: "rohan",
+    name: "Rohan Sharma",
+    role: "IT Support Intern",
+    reason: "Had server access and his laptop was linked to the USB transfer.",
+    guilty: true
+  }
+];
+
+let foundClues = [];
+let eliminatedSuspects = [];
+let gameFinished = false;
+
+const startBtn = document.getElementById("start-btn");
+const introSection = document.getElementById("intro");
+const gameSection = document.getElementById("game");
+const evidenceBoard = document.getElementById("evidence-board");
+const suspectList = document.getElementById("suspect-list");
+const clueCount = document.getElementById("clue-count");
+const eliminatedCount = document.getElementById("eliminated-count");
+const finalSection = document.getElementById("final-section");
+const resultSection = document.getElementById("result-section");
+const resultTitle = document.getElementById("result-title");
+const resultText = document.getElementById("result-text");
+const reportList = document.getElementById("report-list");
+const accusationSelect = document.getElementById("accusation");
+const accuseBtn = document.getElementById("accuse-btn");
+const restartBtn = document.getElementById("restart-btn");
+
+startBtn.addEventListener("click", startGame);
+accuseBtn.addEventListener("click", makeAccusation);
+restartBtn.addEventListener("click", restartGame);
+
+function startGame() {
+  introSection.classList.add("hidden");
+  gameSection.classList.remove("hidden");
+  loadSavedGame();
+  renderEvidence();
+  renderSuspects();
+  updateStats();
+}
+
+function renderEvidence() {
+  evidenceBoard.innerHTML = "";
+
+  evidence.forEach((item) => {
+    const isUnlocked = foundClues.includes(item.id);
+    const evidenceCard = document.createElement("div");
+
+    evidenceCard.className = isUnlocked ? "evidence unlocked" : "evidence";
+
+    evidenceCard.innerHTML = `
+      <h3>${item.title}</h3>
+      <p>${isUnlocked ? item.clue : item.description}</p>
+      <p><strong>${isUnlocked ? "Clue unlocked" : "Click to examine"}</strong></p>
+    `;
+
+    evidenceCard.addEventListener("click", () => examineEvidence(item.id));
+    evidenceBoard.appendChild(evidenceCard);
+  });
+}
+
+function examineEvidence(evidenceId) {
+  if (gameFinished) return;
+
+  const selectedItem = evidence.find((item) => item.id === evidenceId);
+
+  if (!selectedItem || foundClues.includes(evidenceId)) return;
+
+  foundClues.push(evidenceId);
+  saveGame();
+  renderEvidence();
+  updateStats();
+
+  if (foundClues.length >= 2) {
+    eliminateSuspect("aarav");
+  }
+
+  if (foundClues.length >= 3) {
+    eliminateSuspect("neha");
+    finalSection.classList.remove("hidden");
+  }
+}
+
+function renderSuspects() {
+  suspectList.innerHTML = "";
+
+  suspects.forEach((suspect) => {
+    const isEliminated = eliminatedSuspects.includes(suspect.id);
+    const suspectCard = document.createElement("div");
+
+    suspectCard.className = isEliminated ? "suspect eliminated" : "suspect";
+
+    suspectCard.innerHTML = `
+      <h3>${suspect.name}</h3>
+      <p><strong>${suspect.role}</strong></p>
+      <p>${suspect.reason}</p>
+      <p>${isEliminated ? "❌ Eliminated" : "🔍 Under investigation"}</p>
+    `;
+
+    suspectList.appendChild(suspectCard);
+  });
+}
+
+function eliminateSuspect(suspectId) {
+  if (eliminatedSuspects.includes(suspectId)) return;
+
+  eliminatedSuspects.push(suspectId);
+  saveGame();
+  renderSuspects();
+  updateStats();
+}
+
+function updateStats() {
+  clueCount.textContent = foundClues.length;
+  eliminatedCount.textContent = eliminatedSuspects.length;
+}
+
+function makeAccusation() {
+  if (gameFinished) return;
+
+  const chosenSuspect = accusationSelect.value;
+
+  if (!chosenSuspect) {
+    alert("Please choose a suspect before submitting your accusation.");
+    return;
+  }
+
+  if (foundClues.length < 3) {
+    alert("You need at least 3 clues before making an accusation.");
+    return;
+  }
+
+  const accused = suspects.find((suspect) => suspect.id === chosenSuspect);
+  gameFinished = true;
+
+  finalSection.classList.add("hidden");
+  resultSection.classList.remove("hidden");
+
+  if (accused.guilty) {
+    resultTitle.textContent = "✅ Correct Arrest";
+    resultTitle.className = "correct";
+    resultText.textContent =
+      "Rohan Sharma used his IT-support access to copy student records. The USB transfer record and library Wi-Fi evidence confirmed his involvement.";
+  } else {
+    resultTitle.textContent = "❌ Wrong Arrest";
+    resultTitle.className = "wrong";
+    resultText.textContent =
+      `${accused.name} was not responsible for the breach. The evidence pointed to Rohan Sharma, whose laptop was connected to the USB transfer.`;
+  }
+
+  createReport();
+  saveGame();
+}
+
+function createReport() {
+  reportList.innerHTML = "";
+
+  const reportItems = [
+    `Clues collected: ${foundClues.length}/4`,
+    `Suspects eliminated: ${eliminatedSuspects.length}/2`,
+    `Final accusation: ${accusationSelect.value || "None"}`,
+    `Outcome: ${resultTitle.textContent}`
+  ];
+
+  reportItems.forEach((item) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = item;
+    reportList.appendChild(listItem);
+  });
+}
+
+function saveGame() {
+  const gameData = {
+    foundClues,
+    eliminatedSuspects,
+    gameFinished,
+    accusation: accusationSelect.value
+  };
+
+  localStorage.setItem("digitalDetectiveGame", JSON.stringify(gameData));
+}
+
+function loadSavedGame() {
+  const savedData = localStorage.getItem("digitalDetectiveGame");
+
+  if (!savedData) return;
+
+  const gameData = JSON.parse(savedData);
+
+  foundClues = gameData.foundClues || [];
+  eliminatedSuspects = gameData.eliminatedSuspects || [];
+  gameFinished = gameData.gameFinished || false;
+  accusationSelect.value = gameData.accusation || "";
+
+  if (foundClues.length >= 3) {
+    finalSection.classList.remove("hidden");
+  }
+
+  if (gameFinished) {
+    finalSection.classList.add("hidden");
+    resultSection.classList.remove("hidden");
+
+    const accused = suspects.find(
+      (suspect) => suspect.id === gameData.accusation
+    );
+
+    if (accused && accused.guilty) {
+      resultTitle.textContent = "✅ Correct Arrest";
+      resultTitle.className = "correct";
+      resultText.textContent =
+        "Rohan Sharma used his IT-support access to copy student records.";
+    } else {
+      resultTitle.textContent = "❌ Wrong Arrest";
+      resultTitle.className = "wrong";
+      resultText.textContent =
+        "The evidence pointed to Rohan Sharma, not the accused suspect.";
+    }
+
+    createReport();
+  }
+}
+
+function restartGame() {
+  localStorage.removeItem("digitalDetectiveGame");
+
+  foundClues = [];
+  eliminatedSuspects = [];
+  gameFinished = false;
+  accusationSelect.value = "";
+
+  resultSection.classList.add("hidden");
+  finalSection.classList.add("hidden");
+
+  renderEvidence();
+  renderSuspects();
+  updateStats();
+}
+</script>
+
+</body>
+</html>
