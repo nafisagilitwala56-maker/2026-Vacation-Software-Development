@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KindLink Project</title>
+  <style>
+    body {
+      background-color: #f5f3ff;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #c4b5fd;
+      color: #1f2937;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .menu {
+      background-color: #a78bfa;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .menu button {
+      background-color: #a7f3d0;
+      color: #065f46;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .menu button:hover {
+      background-color: #6ee7b7;
+    }
+
+    section {
+      display: none;
+      max-width: 700px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+
+    section.active {
+      display: block;
+    }
+
+    h2 {
+      color: #7c3aed;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #4c1d95;
+    }
+
+    input[type=text],
+    input[type=email],
+    input[type=password],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background-color: #f9f9ff;
+    }
+
+    input[type=submit] {
+      background-color: #34d399;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    input[type=submit]:hover {
+      background-color: #059669;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #ede9fe;
+      padding: 15px;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>KindLink</h1>
+  <p>Connecting NGOs and Volunteers</p>
+</header>
+
+<div class="menu">
+  <button onclick="show('home')">Home</button>
+  <button onclick="show('login')">Login</button>
+  <button onclick="show('register')">Register</button>
+  <button onclick="show('ngo')">NGO Form</button>
+  <button onclick="show('report')">Report</button>
+</div>
+
+<section id="home" class="active">
+  <h2>Welcome</h2>
+  <p>KindLink is a platform where NGOs can get help from kind people who want to support or volunteer. It's simple and easy to use.</p>
+</section>
+
+<section id="login">
+  <h2>Login</h2>
+  <form>
+    <label>Email</label>
+    <input type="email" required>
+    <label>Password</label>
+    <input type="password" required>
+    <input type="submit" value="Login">
+  </form>
+</section>
+
+<section id="register">
+  <h2>Register</h2>
+  <form>
+    <label>Full Name</label>
+    <input type="text" required>
+    <label>Email</label>
+    <input type="email" required>
+    <label>Password</label>
+    <input type="password" required>
+    <input type="submit" value="Register">
+  </form>
+</section>
+
+<section id="ngo">
+  <h2>NGO Form</h2>
+  <form>
+    <label>NGO Name</label>
+    <input type="text" required>
+    <label>Cause</label>
+    <input type="text" required>
+    <label>Location</label>
+    <input type="text" required>
+    <label>Description</label>
+    <textarea rows="4"></textarea>
+    <input type="submit" value="Submit">
+  </form>
+</section>
+<footer>
+  <p>&copy; 2025 KindLink Project by Nafisa Gilitwala</p>
+</footer>
+
+<script>
+  function show(id) {
+    let sections = document.querySelectorAll('section');
+    sections.forEach(section => section.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
